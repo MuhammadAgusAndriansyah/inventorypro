@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InventoryPro - Sistem Manajemen Inventaris</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        /* ... (CSS sama persis seperti pada jawaban sebelumnya, tidak diubah) ... */
+        :root {
+            --bg: #f0f2f5;
+            --sidebar-bg: #1a1d23;
+            --sidebar-text: #b0b8c1;
+            --sidebar-active: #ffffff;
+            --sidebar-hover: #262a33;
+            --primary: #4f6ef7;
+            --primary-dark: #3b54d4;
+            --card-bg: #ffffff;
+            --text: #1a1d23;
+            --text-secondary: #6b7280;
+            --border: #e5e7eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.08), 0 4px 10px rgba(0, 0, 0, 0.05);
+            --radius: 12px;
+            --radius-sm: 8px;
+            --transition: 0.2s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* LOGIN */
+        .login-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1d23 0%, #2d3344 40%, #1a1d23 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .login-container::before {
+            content: '';
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(79, 110, 247, 0.15) 0%, transparent 70%);
+            top: -200px;
+            right: -150px;
+            border-radius: 50%;
+        }
+        .login-container::after {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
+            bottom: -180px;
+            left: -120px;
+            border-radius: 50%;
+        }
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 48px 40px;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+        .login-card .logo {
+            width: 60px;
+            height: 60px;
+            background: var(--primary);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 28px;
+            color: #fff;
+            font-weight: 700;
+        }
+        .login-card h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a1d23;
+            margin-bottom: 6px;
+        }
+        .login-card .subtitle {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 32px;
+        }
+        .login-card .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .login-card label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 6px;
+            letter-spacing: 0.3px;
+        }
+        .login-card input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: var(--transition);
+            background: #f9fafb;
+            font-family: inherit;
+        }
+        .login-card input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.1);
+            background: #fff;
+        }
+        .btn-login {
+            width: 100%;
+            padding: 13px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 8px;
+            letter-spacing: 0.3px;
+        }
+        .btn-login:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 8px 25px rgba(79, 110, 247, 0.35);
+        }
+        .login-error {
+            color: var(--danger);
+            font-size: 13px;
+            margin-top: 8px;
+            display: none;
+        }
+        .login-hint {
+            font-size: 11px;
+            color: #9ca3af;
+            margin-top: 20px;
+        }
+
+        /* SIDEBAR & MAIN CONTENT */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: 260px;
+            background: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            padding: 24px 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 20px rgba(0, 0, 0, 0.15);
+        }
+        .sidebar-header {
+            padding: 0 20px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .sidebar-header .s-logo {
+            width: 42px;
+            height: 42px;
+            background: var(--primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #fff;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        .sidebar-header .s-title {
+            font-weight: 700;
+            font-size: 16px;
+            color: #fff;
+            letter-spacing: 0.3px;
+        }
+        .sidebar-nav {
+            flex: 1;
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            overflow-y: auto;
+        }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-family: inherit;
+        }
+        .nav-item:hover {
+            background: var(--sidebar-hover);
+            color: #fff;
+        }
+        .nav-item.active {
+            background: rgba(79, 110, 247, 0.2);
+            color: #fff;
+            font-weight: 600;
+            box-shadow: inset 3px 0 0 var(--primary);
+        }
+        .nav-icon {
+            width: 20px;
+            text-align: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+        .sidebar-footer {
+            padding: 16px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #4f6ef7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .user-name {
+            font-size: 13px;
+            color: #fff;
+            font-weight: 500;
+        }
+        .btn-logout {
+            width: 100%;
+            padding: 9px;
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: var(--transition);
+            font-family: inherit;
+        }
+        .btn-logout:hover {
+            background: rgba(239, 68, 68, 0.25);
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 28px 32px;
+            min-height: 100vh;
+        }
+        .page {
+            display: none;
+        }
+        .page.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .page-header {
+            margin-bottom: 28px;
+        }
+        .page-header h2 {
+            font-size: 26px;
+            font-weight: 700;
+            color: #1a1d23;
+            letter-spacing: -0.3px;
+        }
+        .breadcrumb {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+            transition: var(--transition);
+        }
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .card-header h3 {
+            font-size: 17px;
+            font-weight: 600;
+            color: #1a1d23;
+            letter-spacing: -0.2px;
+        }
+        .card-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: var(--transition);
+        }
+        .stat-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+        .stat-icon.blue { background: #eff6ff; color: #3b82f6; }
+        .stat-icon.green { background: #ecfdf5; color: #10b981; }
+        .stat-icon.orange { background: #fffbeb; color: #f59e0b; }
+        .stat-icon.red { background: #fef2f2; color: #ef4444; }
+        .stat-info .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1d23;
+            letter-spacing: -0.5px;
+        }
+        .stat-info .stat-label {
+            font-size: 12px;
+            color: #6b7280;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        table th, table td {
+            padding: 12px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+        table th {
+            background: #f9fafb;
+            font-weight: 600;
+            color: #374151;
+            font-size: 12px;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            position: sticky;
+            top: 0;
+        }
+        table tbody tr:hover {
+            background: #f9fafb;
+        }
+        table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+        }
+        .badge-success { background: #d1fae5; color: #065f46; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+        .badge-info { background: #dbeafe; color: #1e40af; }
+        .badge-purple { background: #ede9fe; color: #5b21b6; }
+
+        .btn {
+            padding: 9px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: var(--transition);
+            font-family: inherit;
+            letter-spacing: 0.2px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+        .btn-primary { background: var(--primary); color: #fff; }
+        .btn-primary:hover { background: var(--primary-dark); box-shadow: 0 4px 14px rgba(79, 110, 247, 0.3); transform: translateY(-1px); }
+        .btn-success { background: var(--success); color: #fff; }
+        .btn-success:hover { background: #059669; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3); }
+        .btn-warning { background: var(--warning); color: #1a1d23; }
+        .btn-warning:hover { background: #d97706; color: #fff; }
+        .btn-danger { background: var(--danger); color: #fff; }
+        .btn-danger:hover { background: #dc2626; }
+        .btn-outline { background: #fff; color: #374151; border: 2px solid #d1d5db; }
+        .btn-outline:hover { border-color: #9ca3af; background: #f9fafb; }
+        .btn-sm { padding: 5px 10px; font-size: 11px; border-radius: 6px; }
+        .btn-xs { padding: 3px 8px; font-size: 10px; border-radius: 5px; }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 5px;
+            letter-spacing: 0.2px;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: var(--transition);
+            background: #f9fafb;
+            font-family: inherit;
+            resize: vertical;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.08);
+            background: #fff;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+        .search-input {
+            padding: 9px 14px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 13px;
+            min-width: 200px;
+            transition: var(--transition);
+            background: #fff;
+            font-family: inherit;
+        }
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.08);
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(2px);
+        }
+        .modal-overlay.show { display: flex; }
+        .modal {
+            background: #fff;
+            border-radius: 16px;
+            padding: 28px 32px;
+            width: 90%;
+            max-width: 650px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.25);
+            animation: modalIn 0.25s ease;
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.95) translateY(-10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .modal h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            letter-spacing: -0.3px;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 350px;
+            width: 100%;
+        }
+        .chart-container canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #9ca3af;
+        }
+        .empty-icon { font-size: 48px; margin-bottom: 12px; }
+
+        .filter-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .filter-row select, .filter-row input {
+            padding: 9px 14px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 13px;
+            background: #fff;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .low-stock {
+            color: #ef4444;
+            font-weight: 700;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0%,100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px; right: 20px;
+            padding: 14px 20px;
+            border-radius: 10px;
+            color: #fff;
+            font-weight: 600;
+            font-size: 14px;
+            z-index: 999;
+            animation: slideIn 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-width: 400px;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(120%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .toast-success { background: #10b981; }
+        .toast-error { background: #ef4444; }
+        .toast-info { background: #3b82f6; }
+
+        @media (max-width: 768px) {
+            .sidebar { width: 200px; }
+            .main-content { margin-left: 200px; padding: 20px 16px; }
+            .stats-row { grid-template-columns: 1fr 1fr; }
+            .form-row { grid-template-columns: 1fr; }
+            .chart-container { height: 250px; }
+        }
+        @media (max-width: 540px) {
+            .sidebar { width: 60px; }
+            .sidebar .s-title, .sidebar .nav-item span:not(.nav-icon), .sidebar .user-name, .sidebar .btn-logout span { display: none; }
+            .sidebar-header { padding: 0 8px 16px; justify-content: center; }
+            .sidebar-nav .nav-item { justify-content: center; padding: 12px; }
+            .main-content { margin-left: 60px; }
+            .stats-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LOGIN PAGE -->
+    <div id="loginPage" class="login-container">
+        <div class="login-card">
+            <div class="logo">📦</div>
+            <h1>InventoryPro</h1>
+            <p class="subtitle">Sistem Manajemen Inventaris</p>
+            <form id="loginForm" autocomplete="off">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="loginUsername" placeholder="Masukkan username" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" placeholder="Masukkan password" required>
+                </div>
+                <p class="login-error" id="loginError">Username atau password salah!</p>
+                <button type="submit" class="btn-login">🔐 Masuk</button>
+            </form>
+            <p class="login-hint">Default: admin / admin123</p>
+        </div>
+    </div>
+
+    <!-- APP CONTAINER -->
+    <div id="appContainer" class="app-container" style="display:none;">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="s-logo">📦</div>
+                <span class="s-title">InventoryPro</span>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-page="dashboard"><span class="nav-icon">📊</span> Dashboard</button>
+                <button class="nav-item" data-page="master"><span class="nav-icon">📋</span> Master Data</button>
+                <button class="nav-item" data-page="keluar"><span class="nav-icon">📤</span> Barang Keluar</button>
+                <button class="nav-item" data-page="peminjaman"><span class="nav-icon">🤝</span> Peminjaman</button>
+                <button class="nav-item" data-page="riwayat"><span class="nav-icon">🕐</span> Riwayat</button>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="avatar" id="sidebarAvatar">A</div>
+                    <span class="user-name" id="sidebarUsername">Admin</span>
+                </div>
+                <button class="btn-logout" onclick="logout()">🚪 <span>Keluar</span></button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <!-- DASHBOARD -->
+            <div id="page-dashboard" class="page active">
+                <div class="page-header"><h2>📊 Dashboard</h2><p class="breadcrumb">Ringkasan inventaris & laporan</p></div>
+                <div class="stats-row" id="dashboardStats"></div>
+                <div class="card">
+                    <div class="card-header"><h3>🔍 Filter Laporan</h3></div>
+                    <div class="filter-row">
+                        <select id="dashFilterKategori" onchange="refreshDashboard()">
+                            <option value="">Semua Kategori</option>
+                            <option value="Hardware">Hardware</option>
+                            <option value="Network Device">Network Device</option>
+                            <option value="Peripheral">Peripheral</option>
+                        </select>
+                        <select id="dashFilterLokasi" onchange="refreshDashboard()">
+                            <option value="">Semua Lokasi</option>
+                            <option value="C0402">C0402</option>
+                            <option value="Gudang Lantai 4">Gudang Lantai 4</option>
+                            <option value="Gudang Lantai 10">Gudang Lantai 10</option>
+                        </select>
+                        <button class="btn btn-outline btn-sm" onclick="resetDashboardFilter()">🔄 Reset Filter</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>📈 Stok Berdasarkan Nama Barang</h3></div>
+                    <div class="chart-container"><canvas id="stockChart"></canvas></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>🤝 Barang yang Sedang Dipinjam</h3></div>
+                    <div class="table-wrapper">
+                        <table id="tableDipinjam">
+                            <thead><tr><th>ID Pinjam</th><th>Peminjam</th><th>No Ticket</th><th>Nama Barang</th><th>QTY</th><th>Tujuan</th><th>Tgl Pinjam</th><th>Aksi</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>⚠️ Barang yang Harus di-Restock (Stok &lt; 3)</h3></div>
+                    <div class="table-wrapper">
+                        <table id="tableRestock">
+                            <thead><tr><th>ID Barang</th><th>Nama Barang</th><th>Kategori</th><th>QTY</th><th>Lokasi</th><th>Keterangan</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MASTER DATA -->
+            <div id="page-master" class="page">
+                <div class="page-header"><h2>📋 Master Data Barang</h2><p class="breadcrumb">Kelola data inventaris</p></div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Daftar Barang</h3>
+                        <div class="card-actions">
+                            <input type="text" class="search-input" id="searchMaster" placeholder="🔍 Cari barang..." oninput="renderMasterTable()">
+                            <button class="btn btn-primary" onclick="openMasterModal()">➕ Tambah Barang</button>
+                        </div>
+                    </div>
+                    <div class="table-wrapper">
+                        <table id="tableMaster">
+                            <thead><tr><th>ID Barang</th><th>No Ticket</th><th>Kategori</th><th>Nama Barang</th><th>Serial Number</th><th>FA Number</th><th>QTY</th><th>Lokasi</th><th>Keterangan</th><th>Aksi</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BARANG KELUAR -->
+            <div id="page-keluar" class="page">
+                <div class="page-header"><h2>📤 Transaksi Barang Keluar</h2><p class="breadcrumb">Catat barang yang keluar dari inventaris</p></div>
+                <div class="card">
+                    <div class="card-header"><h3>Form Barang Keluar</h3></div>
+                    <form id="formKeluar" autocomplete="off">
+                        <div class="form-row">
+                            <div class="form-group"><label>Tanggal</label><input type="date" id="keluarTanggal" required></div>
+                            <div class="form-group"><label>ID Barang</label><select id="keluarIdBarang" required onchange="autoFillKeluar()"><option value="">-- Pilih Barang --</option></select></div>
+                            <div class="form-group"><label>No Ticket</label><input type="text" id="keluarNoTicket" placeholder="No Ticket" required></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Kategori (Auto)</label><input type="text" id="keluarKategori" readonly placeholder="Terisi otomatis"></div>
+                            <div class="form-group"><label>Nama Barang (Auto)</label><input type="text" id="keluarNamaBarang" readonly placeholder="Terisi otomatis"></div>
+                            <div class="form-group"><label>Serial Number (Auto)</label><input type="text" id="keluarSerial" readonly placeholder="Terisi otomatis"></div>
+                            <div class="form-group"><label>FA Number (Auto)</label><input type="text" id="keluarFANumber" readonly placeholder="Terisi otomatis"></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label>QTY Keluar</label><input type="number" id="keluarQTY" min="1" placeholder="Jumlah" required></div>
+                            <div class="form-group"><label>Keterangan</label><input type="text" id="keluarKeterangan" placeholder="Keterangan"></div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">✅ Proses Barang Keluar</button>
+                    </form>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Riwayat Barang Keluar</h3>
+                        <input type="text" class="search-input" id="searchKeluar" placeholder="🔍 Cari..." oninput="renderKeluarTable()">
+                    </div>
+                    <div class="table-wrapper">
+                        <table id="tableKeluar">
+                            <thead><tr><th>ID</th><th>Tanggal</th><th>ID Barang</th><th>Kategori</th><th>Nama Barang</th><th>Serial</th><th>FA Number</th><th>No Ticket</th><th>QTY</th><th>Ket</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PEMINJAMAN -->
+            <div id="page-peminjaman" class="page">
+                <div class="page-header"><h2>🤝 Transaksi Peminjaman</h2><p class="breadcrumb">Catat peminjaman barang</p></div>
+                <div class="card">
+                    <div class="card-header"><h3>Form Peminjaman</h3></div>
+                    <form id="formPeminjaman" autocomplete="off">
+                        <div class="form-row">
+                            <div class="form-group"><label>Nama Peminjam</label><input type="text" id="pinjamNama" placeholder="Nama peminjam" required></div>
+                            <div class="form-group"><label>Nomor Ticket</label><input type="text" id="pinjamNoTicket" placeholder="Nomor Ticket" required></div>
+                            <div class="form-group"><label>Tanggal Pinjam</label><input type="date" id="pinjamTanggal" required></div>
+                        </div>
+                        <div id="pinjamItemsContainer">
+                            <div class="pinjam-item-row" style="border:1px solid #e5e7eb;border-radius:10px;padding:16px;margin-bottom:12px;background:#fafafa;">
+                                <div class="form-row">
+                                    <div class="form-group"><label>Nama Barang</label><select class="pinjam-barang-select" required onchange="updatePinjamItemInfo(this)"><option value="">-- Pilih Barang --</option></select></div>
+                                    <div class="form-group"><label>QTY</label><input type="number" class="pinjam-qty" min="1" placeholder="Jumlah" required></div>
+                                    <div class="form-group"><label>Dipinjam Untuk</label><input type="text" class="pinjam-tujuan" placeholder="Tujuan peminjaman" required></div>
+                                    <div class="form-group"><label>Keterangan</label><input type="text" class="pinjam-ket" placeholder="Keterangan"></div>
+                                </div>
+                                <span class="stok-info" style="font-size:11px;color:#6b7280;"></span>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-outline btn-sm" onclick="addPinjamItemRow()" style="margin-bottom:16px;">➕ Tambah Barang</button><br>
+                        <button type="submit" class="btn btn-primary">✅ Proses Peminjaman</button>
+                    </form>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Daftar Peminjaman</h3>
+                        <input type="text" class="search-input" id="searchPeminjaman" placeholder="🔍 Cari..." oninput="renderPeminjamanTable()">
+                    </div>
+                    <div class="table-wrapper">
+                        <table id="tablePeminjaman">
+                            <thead><tr><th>ID Pinjam</th><th>Peminjam</th><th>No Ticket</th><th>Tgl Pinjam</th><th>Items</th><th>Status</th><th>Aksi</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIWAYAT (DENGAN FILTER TIPE BARU) -->
+            <div id="page-riwayat" class="page">
+                <div class="page-header"><h2>🕐 Riwayat Transaksi</h2><p class="breadcrumb">Semua riwayat transaksi</p></div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Semua Riwayat</h3>
+                        <div class="card-actions" style="display: flex; gap: 10px; align-items: center;">
+                            <select id="filterTipeRiwayat" onchange="renderRiwayatTable()" style="padding: 9px 14px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 13px; background: #fff; font-family: inherit;">
+                                <option value="">Semua Tipe</option>
+                                <option value="tambah_barang">Tambah Barang</option>
+                                <option value="edit_barang">Edit Barang</option>
+                                <option value="hapus_barang">Hapus Barang</option>
+                                <option value="barang_keluar">Barang Keluar</option>
+                                <option value="peminjaman">Peminjaman</option>
+                                <option value="pengembalian">Pengembalian</option>
+                            </select>
+                            <input type="text" class="search-input" id="searchRiwayat" placeholder="🔍 Cari riwayat..." oninput="renderRiwayatTable()">
+                        </div>
+                    </div>
+                    <div class="table-wrapper">
+                        <table id="tableRiwayat">
+                            <thead><tr><th>Waktu</th><th>Tipe</th><th>Detail</th><th>QTY</th><th>User</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL MASTER -->
+    <div class="modal-overlay" id="modalMaster">
+        <div class="modal">
+            <h3 id="modalMasterTitle">Tambah Barang</h3>
+            <form id="formMaster" autocomplete="off">
+                <input type="hidden" id="mIdBarang">
+                <div class="form-row">
+                    <div class="form-group"><label>Nomor Ticket</label><input type="text" id="mNoTicket" placeholder="Nomor Ticket"></div>
+                    <div class="form-group"><label>Kategori</label><select id="mKategori" required><option value="">-- Pilih --</option><option value="Hardware">Hardware</option><option value="Network Device">Network Device</option><option value="Peripheral">Peripheral</option></select></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Nama Barang</label><input type="text" id="mNamaBarang" placeholder="Nama barang" required></div>
+                    <div class="form-group"><label>Serial Number</label><input type="text" id="mSerial" placeholder="Serial Number"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>FA Number</label><input type="text" id="mFANumber" placeholder="FA Number"></div>
+                    <div class="form-group"><label>QTY</label><input type="number" id="mQTY" min="0" placeholder="Jumlah" required></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Lokasi</label><select id="mLokasi" required><option value="">-- Pilih --</option><option value="C0402">C0402</option><option value="Gudang Lantai 4">Gudang Lantai 4</option><option value="Gudang Lantai 10">Gudang Lantai 10</option></select></div>
+                    <div class="form-group"><label>Keterangan</label><input type="text" id="mKeterangan" placeholder="Keterangan"></div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeMasterModal()">Batal</button>
+                    <button type="submit" class="btn btn-primary">💾 Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toastContainer"></div>
+
+    <script>
+        // ==================== DATA STORAGE ====================
+        const STORAGE_KEY = 'inventorypro_data';
+
+        function getDefaultData() {
+            return {
+                users: [{ username: 'admin', password: 'admin123', name: 'Administrator' }],
+                masterData: [
+                    { id_barang: 'BRG-001', nomor_ticket: 'TKT-101', kategori: 'Hardware', nama_barang: 'Laptop Dell Latitude', serial_number: 'SN-DELL-001', fa_number: 'FA-001', qty: 10, lokasi: 'C0402', keterangan: 'Laptop untuk tim dev' },
+                    { id_barang: 'BRG-002', nomor_ticket: 'TKT-102', kategori: 'Network Device', nama_barang: 'Cisco Switch 24 Port', serial_number: 'SN-CISCO-002', fa_number: 'FA-002', qty: 5, lokasi: 'Gudang Lantai 4', keterangan: 'Switch utama' },
+                    { id_barang: 'BRG-003', nomor_ticket: 'TKT-103', kategori: 'Peripheral', nama_barang: 'Logitech Keyboard K120', serial_number: 'SN-LOG-003', fa_number: 'FA-003', qty: 25, lokasi: 'Gudang Lantai 10', keterangan: 'Keyboard standar' },
+                    { id_barang: 'BRG-004', nomor_ticket: 'TKT-104', kategori: 'Hardware', nama_barang: 'Monitor Dell 24"', serial_number: 'SN-DELL-M24', fa_number: 'FA-004', qty: 2, lokasi: 'C0402', keterangan: 'Monitor 24 inch' },
+                    { id_barang: 'BRG-005', nomor_ticket: 'TKT-105', kategori: 'Network Device', nama_barang: 'Router MikroTik', serial_number: 'SN-MIK-005', fa_number: 'FA-005', qty: 1, lokasi: 'Gudang Lantai 4', keterangan: 'Router edge' },
+                ],
+                transaksiKeluar: [],
+                peminjaman: [],
+                riwayat: [],
+                idCounter: { barang: 6, keluar: 1, pinjam: 1, riwayat: 1 },
+            };
+        }
+
+        function loadData() {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (raw) {
+                try { return JSON.parse(raw); } catch (e) {}
+            }
+            const def = getDefaultData();
+            saveData(def);
+            return def;
+        }
+
+        function saveData(data) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+
+        let appData = loadData();
+        let currentUser = null;
+
+        // ==================== HELPERS ====================
+        function generateIdBarang() {
+            const num = String(appData.idCounter.barang).padStart(3, '0');
+            appData.idCounter.barang++;
+            saveData(appData);
+            return `BRG-${num}`;
+        }
+
+        function generateIdKeluar() {
+            const num = String(appData.idCounter.keluar).padStart(3, '0');
+            appData.idCounter.keluar++;
+            saveData(appData);
+            return `OUT-${num}`;
+        }
+
+        function generateIdPinjam() {
+            const num = String(appData.idCounter.pinjam).padStart(3, '0');
+            appData.idCounter.pinjam++;
+            saveData(appData);
+            return `PJM-${num}`;
+        }
+
+        function generateIdRiwayat() {
+            const num = String(appData.idCounter.riwayat).padStart(4, '0');
+            appData.idCounter.riwayat++;
+            saveData(appData);
+            return `RWY-${num}`;
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+
+        function formatDateTime(isoStr) {
+            if (!isoStr) return '-';
+            const d = new Date(isoStr);
+            return d.toLocaleString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; }, 2500);
+            setTimeout(() => toast.remove(), 2800);
+        }
+
+        // ==================== LOGIN ====================
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            const user = appData.users.find(u => u.username === username && u.password === password);
+            if (user) {
+                currentUser = user;
+                document.getElementById('loginPage').style.display = 'none';
+                document.getElementById('appContainer').style.display = 'flex';
+                document.getElementById('sidebarAvatar').textContent = user.name.charAt(0).toUpperCase();
+                document.getElementById('sidebarUsername').textContent = user.name;
+                document.getElementById('loginError').style.display = 'none';
+                initApp();
+                showToast(`Selamat datang, ${user.name}!`, 'success');
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+            }
+        });
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('appContainer').style.display = 'none';
+            document.getElementById('loginPage').style.display = 'flex';
+            document.getElementById('loginForm').reset();
+            document.getElementById('loginError').style.display = 'none';
+            if (window._stockChartInstance) {
+                window._stockChartInstance.destroy();
+                window._stockChartInstance = null;
+            }
+        }
+
+        // ==================== NAVIGATION ====================
+        document.querySelectorAll('.sidebar-nav .nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const page = this.getAttribute('data-page');
+                switchPage(page);
+                document.querySelectorAll('.sidebar-nav .nav-item').forEach(n => n.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        function switchPage(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            const target = document.getElementById(`page-${page}`);
+            if (target) target.classList.add('active');
+            if (page === 'dashboard') refreshDashboard();
+            if (page === 'master') renderMasterTable();
+            if (page === 'keluar') { populateKeluarBarangSelect(); renderKeluarTable(); }
+            if (page === 'peminjaman') { populatePinjamBarangSelects(); renderPeminjamanTable(); }
+            if (page === 'riwayat') renderRiwayatTable();
+        }
+
+        // ==================== INIT APP ====================
+        function initApp() {
+            refreshDashboard();
+            renderMasterTable();
+            populateKeluarBarangSelect();
+            renderKeluarTable();
+            populatePinjamBarangSelects();
+            renderPeminjamanTable();
+            renderRiwayatTable();
+            setDefaultDates();
+        }
+
+        function setDefaultDates() {
+            const today = new Date().toISOString().split('T')[0];
+            const keluarTanggal = document.getElementById('keluarTanggal');
+            const pinjamTanggal = document.getElementById('pinjamTanggal');
+            if (keluarTanggal && !keluarTanggal.value) keluarTanggal.value = today;
+            if (pinjamTanggal && !pinjamTanggal.value) pinjamTanggal.value = today;
+        }
+
+        // ==================== DASHBOARD ====================
+        function refreshDashboard() {
+            const filterKategori = document.getElementById('dashFilterKategori')?.value || '';
+            const filterLokasi = document.getElementById('dashFilterLokasi')?.value || '';
+
+            let filteredData = [...appData.masterData];
+            if (filterKategori) filteredData = filteredData.filter(d => d.kategori === filterKategori);
+            if (filterLokasi) filteredData = filteredData.filter(d => d.lokasi === filterLokasi);
+
+            const totalBarang = filteredData.length;
+            const totalQTY = filteredData.reduce((sum, d) => sum + d.qty, 0);
+            const restockCount = filteredData.filter(d => d.qty < 3).length;
+            const activePinjam = appData.peminjaman.filter(p => p.status === 'dipinjam').length;
+
+            document.getElementById('dashboardStats').innerHTML = `
+                <div class="stat-card"><div class="stat-icon blue">📦</div><div class="stat-info"><div class="stat-value">${totalBarang}</div><div class="stat-label">Total Jenis Barang</div></div></div>
+                <div class="stat-card"><div class="stat-icon green">📋</div><div class="stat-info"><div class="stat-value">${totalQTY}</div><div class="stat-label">Total Stok</div></div></div>
+                <div class="stat-card"><div class="stat-icon orange">🤝</div><div class="stat-info"><div class="stat-value">${activePinjam}</div><div class="stat-label">Peminjaman Aktif</div></div></div>
+                <div class="stat-card"><div class="stat-icon red">⚠️</div><div class="stat-info"><div class="stat-value">${restockCount}</div><div class="stat-label">Perlu Restock</div></div></div>
+            `;
+
+            // Chart
+            const labels = filteredData.map(d => d.nama_barang);
+            const qtyData = filteredData.map(d => d.qty);
+            const bgColors = filteredData.map(d => d.qty < 3 ? 'rgba(239,68,68,0.7)' : 'rgba(79,110,247,0.7)');
+            const borderColors = filteredData.map(d => d.qty < 3 ? '#ef4444' : '#4f6ef7');
+
+            const ctx = document.getElementById('stockChart').getContext('2d');
+            if (window._stockChartInstance) window._stockChartInstance.destroy();
+            window._stockChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Stok (QTY)',
+                        data: qtyData,
+                        backgroundColor: bgColors,
+                        borderColor: borderColors,
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        borderSkipped: false,
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true, position: 'top', labels: { usePointStyle: true, padding: 20 } },
+                        tooltip: { callbacks: { label: ctx => `Stok: ${ctx.raw} unit` } },
+                    },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 }, grid: { color: '#f3f4f6' } },
+                        x: { grid: { display: false }, ticks: { maxRotation: 45, font: { size: 11 } } },
+                    },
+                },
+            });
+
+            // Barang Dipinjam
+            const dipinjamItems = [];
+            appData.peminjaman.filter(p => p.status === 'dipinjam').forEach(p => {
+                p.items.forEach(item => {
+                    dipinjamItems.push({ ...item, id_pinjam: p.id_pinjam, nama_peminjam: p.nama_peminjam, nomor_ticket: p.nomor_ticket, tanggal_pinjam: p.tanggal_pinjam, peminjamanRef: p });
+                });
+            });
+
+            let filteredDipinjam = dipinjamItems;
+            if (filterKategori || filterLokasi) {
+                filteredDipinjam = dipinjamItems.filter(di => {
+                    const masterItem = appData.masterData.find(m => m.id_barang === di.id_barang);
+                    if (!masterItem) return false;
+                    if (filterKategori && masterItem.kategori !== filterKategori) return false;
+                    if (filterLokasi && masterItem.lokasi !== filterLokasi) return false;
+                    return true;
+                });
+            }
+
+            const tbodyDipinjam = document.querySelector('#tableDipinjam tbody');
+            if (filteredDipinjam.length === 0) {
+                tbodyDipinjam.innerHTML = '<tr><td colspan="8" class="empty-state"><span class="empty-icon">✅</span><br>Tidak ada barang yang sedang dipinjam</td></tr>';
+            } else {
+                tbodyDipinjam.innerHTML = filteredDipinjam.map(di => `
+                    <tr>
+                        <td><strong>${di.id_pinjam}</strong></td>
+                        <td>${di.nama_peminjam}</td>
+                        <td>${di.nomor_ticket}</td>
+                        <td>${di.nama_barang}</td>
+                        <td>${di.qty}</td>
+                        <td>${di.tujuan || '-'}</td>
+                        <td>${formatDate(di.tanggal_pinjam)}</td>
+                        <td><button class="btn btn-success btn-xs" onclick="kembalikanPeminjaman('${di.peminjamanRef.id_pinjam}')">✅ Kembalikan</button></td>
+                    </tr>
+                `).join('');
+            }
+
+            // Restock
+            const restockItems = filteredData.filter(d => d.qty < 3);
+            const tbodyRestock = document.querySelector('#tableRestock tbody');
+            if (restockItems.length === 0) {
+                tbodyRestock.innerHTML = '<tr><td colspan="6" class="empty-state"><span class="empty-icon">🎉</span><br>Semua stok aman (≥ 3)</td></tr>';
+            } else {
+                tbodyRestock.innerHTML = restockItems.map(d => `
+                    <tr>
+                        <td><strong>${d.id_barang}</strong></td>
+                        <td>${d.nama_barang}</td>
+                        <td><span class="badge badge-info">${d.kategori}</span></td>
+                        <td><span class="low-stock">${d.qty}</span></td>
+                        <td>${d.lokasi}</td>
+                        <td>${d.keterangan || '-'}</td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        function resetDashboardFilter() {
+            document.getElementById('dashFilterKategori').value = '';
+            document.getElementById('dashFilterLokasi').value = '';
+            refreshDashboard();
+        }
+
+        function kembalikanPeminjaman(idPinjam) {
+            if (!confirm('Konfirmasi pengembalian peminjaman ini? Stok akan dikembalikan.')) return;
+            const pinjam = appData.peminjaman.find(p => p.id_pinjam === idPinjam);
+            if (!pinjam || pinjam.status === 'dikembalikan') {
+                showToast('Peminjaman tidak ditemukan atau sudah dikembalikan.', 'error');
+                return;
+            }
+            pinjam.items.forEach(item => {
+                const master = appData.masterData.find(m => m.id_barang === item.id_barang);
+                if (master) master.qty += item.qty;
+            });
+            pinjam.status = 'dikembalikan';
+            pinjam.tanggal_kembali = new Date().toISOString();
+            appData.riwayat.push({
+                id: generateIdRiwayat(),
+                waktu: new Date().toISOString(),
+                tipe: 'pengembalian',
+                detail: `Pengembalian ${pinjam.id_pinjam} oleh ${pinjam.nama_peminjam} - ${pinjam.items.map(i=>i.nama_barang).join(', ')}`,
+                qty: pinjam.items.reduce((s, i) => s + i.qty, 0),
+                user: currentUser?.name || 'Admin',
+            });
+            saveData(appData);
+            refreshDashboard();
+            renderPeminjamanTable();
+            renderRiwayatTable();
+            renderMasterTable();
+            populateKeluarBarangSelect();
+            populatePinjamBarangSelects();
+            showToast('Barang berhasil dikembalikan! Stok dipulihkan.', 'success');
+        }
+
+        // ==================== MASTER DATA ====================
+        function renderMasterTable() {
+            const search = (document.getElementById('searchMaster')?.value || '').toLowerCase();
+            const filtered = appData.masterData.filter(d => {
+                if (!search) return true;
+                return d.id_barang.toLowerCase().includes(search) ||
+                    d.nama_barang.toLowerCase().includes(search) ||
+                    d.kategori.toLowerCase().includes(search) ||
+                    d.lokasi.toLowerCase().includes(search) ||
+                    (d.serial_number && d.serial_number.toLowerCase().includes(search)) ||
+                    (d.nomor_ticket && d.nomor_ticket.toLowerCase().includes(search));
+            });
+            const tbody = document.querySelector('#tableMaster tbody');
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="10" class="empty-state"><span class="empty-icon">📭</span><br>Tidak ada data</td></tr>';
+            } else {
+                tbody.innerHTML = filtered.map(d => `
+                    <tr>
+                        <td><strong>${d.id_barang}</strong></td>
+                        <td>${d.nomor_ticket || '-'}</td>
+                        <td><span class="badge badge-info">${d.kategori}</span></td>
+                        <td>${d.nama_barang}</td>
+                        <td>${d.serial_number || '-'}</td>
+                        <td>${d.fa_number || '-'}</td>
+                        <td>${d.qty}</td>
+                        <td>${d.lokasi}</td>
+                        <td>${d.keterangan || '-'}</td>
+                        <td>
+                            <button class="btn btn-warning btn-xs" onclick="editMaster('${d.id_barang}')">✏️ Edit</button>
+                            <button class="btn btn-danger btn-xs" onclick="deleteMaster('${d.id_barang}')">🗑️ Hapus</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        function openMasterModal(idBarang = null) {
+            document.getElementById('modalMaster').classList.add('show');
+            if (idBarang) {
+                document.getElementById('modalMasterTitle').textContent = 'Edit Barang';
+                const d = appData.masterData.find(m => m.id_barang === idBarang);
+                if (d) {
+                    document.getElementById('mIdBarang').value = d.id_barang;
+                    document.getElementById('mNoTicket').value = d.nomor_ticket || '';
+                    document.getElementById('mKategori').value = d.kategori;
+                    document.getElementById('mNamaBarang').value = d.nama_barang;
+                    document.getElementById('mSerial').value = d.serial_number || '';
+                    document.getElementById('mFANumber').value = d.fa_number || '';
+                    document.getElementById('mQTY').value = d.qty;
+                    document.getElementById('mLokasi').value = d.lokasi;
+                    document.getElementById('mKeterangan').value = d.keterangan || '';
+                }
+            } else {
+                document.getElementById('modalMasterTitle').textContent = 'Tambah Barang';
+                document.getElementById('formMaster').reset();
+                document.getElementById('mIdBarang').value = '';
+            }
+        }
+
+        function closeMasterModal() {
+            document.getElementById('modalMaster').classList.remove('show');
+            document.getElementById('formMaster').reset();
+        }
+
+        function editMaster(idBarang) { openMasterModal(idBarang); }
+
+        function deleteMaster(idBarang) {
+            const d = appData.masterData.find(m => m.id_barang === idBarang);
+            if (!d) return;
+            if (!confirm(`Hapus barang "${d.nama_barang}" (${d.id_barang})?`)) return;
+            appData.masterData = appData.masterData.filter(m => m.id_barang !== idBarang);
+            appData.riwayat.push({
+                id: generateIdRiwayat(),
+                waktu: new Date().toISOString(),
+                tipe: 'hapus_barang',
+                detail: `Hapus barang ${idBarang} - ${d.nama_barang}`,
+                qty: d.qty,
+                user: currentUser?.name || 'Admin',
+            });
+            saveData(appData);
+            renderMasterTable();
+            refreshDashboard();
+            populateKeluarBarangSelect();
+            populatePinjamBarangSelects();
+            showToast('Barang berhasil dihapus.', 'info');
+        }
+
+        document.getElementById('formMaster').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const idBarang = document.getElementById('mIdBarang').value;
+            const data = {
+                id_barang: idBarang || generateIdBarang(),
+                nomor_ticket: document.getElementById('mNoTicket').value.trim(),
+                kategori: document.getElementById('mKategori').value,
+                nama_barang: document.getElementById('mNamaBarang').value.trim(),
+                serial_number: document.getElementById('mSerial').value.trim(),
+                fa_number: document.getElementById('mFANumber').value.trim(),
+                qty: parseInt(document.getElementById('mQTY').value) || 0,
+                lokasi: document.getElementById('mLokasi').value,
+                keterangan: document.getElementById('mKeterangan').value.trim(),
+            };
+            if (!data.kategori || !data.nama_barang || !data.lokasi) {
+                showToast('Mohon lengkapi field wajib.', 'error');
+                return;
+            }
+            const existingIndex = appData.masterData.findIndex(m => m.id_barang === data.id_barang);
+            if (existingIndex >= 0) {
+                appData.masterData[existingIndex] = data;
+            } else {
+                appData.masterData.push(data);
+            }
+            appData.riwayat.push({
+                id: generateIdRiwayat(),
+                waktu: new Date().toISOString(),
+                tipe: existingIndex >= 0 ? 'edit_barang' : 'tambah_barang',
+                detail: `${existingIndex >= 0 ? 'Edit' : 'Tambah'} barang ${data.id_barang} - ${data.nama_barang}`,
+                qty: data.qty,
+                user: currentUser?.name || 'Admin',
+            });
+            saveData(appData);
+            closeMasterModal();
+            renderMasterTable();
+            refreshDashboard();
+            populateKeluarBarangSelect();
+            populatePinjamBarangSelects();
+            renderRiwayatTable();
+            showToast('Data berhasil disimpan.', 'success');
+        });
+
+        // ==================== BARANG KELUAR ====================
+        function populateKeluarBarangSelect() {
+            const select = document.getElementById('keluarIdBarang');
+            if (!select) return;
+            select.innerHTML = '<option value="">-- Pilih Barang --</option>' +
+                appData.masterData.filter(m => m.qty > 0).map(m => `<option value="${m.id_barang}">${m.id_barang} - ${m.nama_barang} (Stok: ${m.qty})</option>`).join('');
+        }
+
+        function autoFillKeluar() {
+            const idBarang = document.getElementById('keluarIdBarang').value;
+            const master = appData.masterData.find(m => m.id_barang === idBarang);
+            if (master) {
+                document.getElementById('keluarKategori').value = master.kategori;
+                document.getElementById('keluarNamaBarang').value = master.nama_barang;
+                document.getElementById('keluarSerial').value = master.serial_number || '';
+                document.getElementById('keluarFANumber').value = master.fa_number || '';
+            } else {
+                document.getElementById('keluarKategori').value = '';
+                document.getElementById('keluarNamaBarang').value = '';
+                document.getElementById('keluarSerial').value = '';
+                document.getElementById('keluarFANumber').value = '';
+            }
+        }
+
+        document.getElementById('formKeluar').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const idBarang = document.getElementById('keluarIdBarang').value;
+            const master = appData.masterData.find(m => m.id_barang === idBarang);
+            if (!master) { showToast('Pilih barang yang valid.', 'error'); return; }
+            const qtyKeluar = parseInt(document.getElementById('keluarQTY').value) || 0;
+            if (qtyKeluar <= 0) { showToast('QTY harus lebih dari 0.', 'error'); return; }
+            if (qtyKeluar > master.qty) { showToast(`Stok tidak mencukupi! Tersedia: ${master.qty}`, 'error'); return; }
+            master.qty -= qtyKeluar;
+            const transaksi = {
+                id: generateIdKeluar(),
+                tanggal: document.getElementById('keluarTanggal').value,
+                id_barang: idBarang,
+                kategori: master.kategori,
+                nama_barang: master.nama_barang,
+                serial_number: master.serial_number,
+                fa_number: master.fa_number,
+                no_ticket: document.getElementById('keluarNoTicket').value.trim(),
+                qty: qtyKeluar,
+                keterangan: document.getElementById('keluarKeterangan').value.trim(),
+            };
+            appData.transaksiKeluar.push(transaksi);
+            appData.riwayat.push({
+                id: generateIdRiwayat(),
+                waktu: new Date().toISOString(),
+                tipe: 'barang_keluar',
+                detail: `Keluar: ${transaksi.id} - ${master.nama_barang}`,
+                qty: qtyKeluar,
+                user: currentUser?.name || 'Admin',
+            });
+            saveData(appData);
+            document.getElementById('formKeluar').reset();
+            setDefaultDates();
+            ['keluarKategori','keluarNamaBarang','keluarSerial','keluarFANumber'].forEach(id => document.getElementById(id).value = '');
+            populateKeluarBarangSelect();
+            renderKeluarTable();
+            refreshDashboard();
+            renderMasterTable();
+            renderRiwayatTable();
+            populatePinjamBarangSelects();
+            showToast('Barang keluar berhasil diproses!', 'success');
+        });
+
+        function renderKeluarTable() {
+            const search = (document.getElementById('searchKeluar')?.value || '').toLowerCase();
+            const filtered = appData.transaksiKeluar.filter(t => {
+                if (!search) return true;
+                return t.id.toLowerCase().includes(search) || t.nama_barang.toLowerCase().includes(search) || t.no_ticket.toLowerCase().includes(search);
+            });
+            const tbody = document.querySelector('#tableKeluar tbody');
+            tbody.innerHTML = filtered.length === 0 ? '<tr><td colspan="10" class="empty-state">Tidak ada data</td></tr>' :
+                filtered.map(t => `
+                <tr><td>${t.id}</td><td>${formatDate(t.tanggal)}</td><td>${t.id_barang}</td><td>${t.kategori}</td><td>${t.nama_barang}</td><td>${t.serial_number||'-'}</td><td>${t.fa_number||'-'}</td><td>${t.no_ticket}</td><td>${t.qty}</td><td>${t.keterangan||'-'}</td></tr>
+                `).join('');
+        }
+
+        // ==================== PEMINJAMAN ====================
+        function populatePinjamBarangSelects() {
+            const options = '<option value="">-- Pilih Barang --</option>' + appData.masterData.filter(m => m.qty > 0).map(m => `<option value="${m.id_barang}" data-stok="${m.qty}">${m.id_barang} - ${m.nama_barang} (Stok: ${m.qty})</option>`).join('');
+            document.querySelectorAll('.pinjam-barang-select').forEach(s => { const val = s.value; s.innerHTML = options; if (val) s.value = val; });
+        }
+
+        function updatePinjamItemInfo(selectEl) {
+            const row = selectEl.closest('.pinjam-item-row');
+            const stokInfo = row.querySelector('.stok-info');
+            const opt = selectEl.selectedOptions[0];
+            stokInfo.textContent = opt?.dataset.stok ? `Stok tersedia: ${opt.dataset.stok} unit` : '';
+        }
+
+        function addPinjamItemRow() {
+            const container = document.getElementById('pinjamItemsContainer');
+            const row = document.createElement('div');
+            row.className = 'pinjam-item-row';
+            row.style.cssText = 'border:1px solid #e5e7eb;border-radius:10px;padding:16px;margin-bottom:12px;background:#fafafa;position:relative;';
+            row.innerHTML = `
+                <button type="button" style="position:absolute;top:8px;right:10px;background:#fee2e2;border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;color:#991b1b;" onclick="this.closest('.pinjam-item-row').remove()">✕</button>
+                <div class="form-row">
+                    <div class="form-group"><label>Nama Barang</label><select class="pinjam-barang-select" required onchange="updatePinjamItemInfo(this)"><option value="">-- Pilih Barang --</option></select></div>
+                    <div class="form-group"><label>QTY</label><input type="number" class="pinjam-qty" min="1" placeholder="Jumlah" required></div>
+                    <div class="form-group"><label>Dipinjam Untuk</label><input type="text" class="pinjam-tujuan" placeholder="Tujuan" required></div>
+                    <div class="form-group"><label>Keterangan</label><input type="text" class="pinjam-ket" placeholder="Keterangan"></div>
+                </div>
+                <span class="stok-info" style="font-size:11px;color:#6b7280;"></span>
+            `;
+            container.appendChild(row);
+            populatePinjamBarangSelects();
+        }
+
+        document.getElementById('formPeminjaman').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const nama = document.getElementById('pinjamNama').value.trim();
+            const noTicket = document.getElementById('pinjamNoTicket').value.trim();
+            const tgl = document.getElementById('pinjamTanggal').value;
+            if (!nama || !noTicket || !tgl) { showToast('Lengkapi data peminjaman.', 'error'); return; }
+            const rows = document.querySelectorAll('#pinjamItemsContainer .pinjam-item-row');
+            const items = [];
+            for (let row of rows) {
+                const select = row.querySelector('.pinjam-barang-select');
+                const qty = parseInt(row.querySelector('.pinjam-qty').value) || 0;
+                const tujuan = row.querySelector('.pinjam-tujuan').value.trim();
+                const ket = row.querySelector('.pinjam-ket').value.trim();
+                const idBarang = select.value;
+                if (!idBarang || qty <= 0 || !tujuan) continue;
+                const master = appData.masterData.find(m => m.id_barang === idBarang);
+                if (!master || qty > master.qty) {
+                    showToast(`Stok tidak cukup untuk ${master?.nama_barang || idBarang}`, 'error');
+                    return;
+                }
+                items.push({ id_barang: idBarang, nama_barang: master.nama_barang, qty, tujuan, keterangan: ket });
+            }
+            if (items.length === 0) { showToast('Tambahkan minimal 1 barang.', 'error'); return; }
+            items.forEach(it => {
+                const m = appData.masterData.find(m => m.id_barang === it.id_barang);
+                if (m) m.qty -= it.qty;
+            });
+            const peminjaman = {
+                id_pinjam: generateIdPinjam(),
+                nama_peminjam: nama,
+                nomor_ticket: noTicket,
+                tanggal_pinjam: tgl,
+                items,
+                status: 'dipinjam',
+                tanggal_kembali: null
+            };
+            appData.peminjaman.push(peminjaman);
+            appData.riwayat.push({
+                id: generateIdRiwayat(),
+                waktu: new Date().toISOString(),
+                tipe: 'peminjaman',
+                detail: `Pinjam: ${peminjaman.id_pinjam} oleh ${nama}`,
+                qty: items.reduce((s,i)=>s+i.qty,0),
+                user: currentUser?.name || 'Admin'
+            });
+            saveData(appData);
+            document.getElementById('formPeminjaman').reset();
+            setDefaultDates();
+            document.getElementById('pinjamItemsContainer').innerHTML = `
+                <div class="pinjam-item-row" style="border:1px solid #e5e7eb;border-radius:10px;padding:16px;margin-bottom:12px;background:#fafafa;">
+                    <div class="form-row">
+                        <div class="form-group"><label>Nama Barang</label><select class="pinjam-barang-select" required onchange="updatePinjamItemInfo(this)"><option value="">-- Pilih Barang --</option></select></div>
+                        <div class="form-group"><label>QTY</label><input type="number" class="pinjam-qty" min="1" required></div>
+                        <div class="form-group"><label>Dipinjam Untuk</label><input type="text" class="pinjam-tujuan" required></div>
+                        <div class="form-group"><label>Keterangan</label><input type="text" class="pinjam-ket"></div>
+                    </div>
+                    <span class="stok-info"></span>
+                </div>
+            `;
+            populatePinjamBarangSelects();
+            renderPeminjamanTable();
+            refreshDashboard();
+            renderMasterTable();
+            renderRiwayatTable();
+            populateKeluarBarangSelect();
+            showToast('Peminjaman berhasil dicatat!', 'success');
+        });
+
+        function renderPeminjamanTable() {
+            const search = (document.getElementById('searchPeminjaman')?.value || '').toLowerCase();
+            const filtered = appData.peminjaman.filter(p => {
+                if (!search) return true;
+                return p.id_pinjam.toLowerCase().includes(search) || p.nama_peminjam.toLowerCase().includes(search) || p.nomor_ticket.includes(search);
+            });
+            const tbody = document.querySelector('#tablePeminjaman tbody');
+            tbody.innerHTML = filtered.length === 0 ? '<tr><td colspan="7" class="empty-state">Belum ada peminjaman</td></tr>' :
+                filtered.map(p => `
+                <tr>
+                    <td>${p.id_pinjam}</td><td>${p.nama_peminjam}</td><td>${p.nomor_ticket}</td><td>${formatDate(p.tanggal_pinjam)}</td>
+                    <td>${p.items.map(i=>`${i.nama_barang} (x${i.qty})`).join('<br>')}</td>
+                    <td><span class="badge ${p.status==='dipinjam'?'badge-warning':'badge-success'}">${p.status}</span></td>
+                    <td>${p.status==='dipinjam' ? `<button class="btn btn-success btn-xs" onclick="kembalikanPeminjaman('${p.id_pinjam}')">✅ Kembalikan</button>` : `<span style="font-size:11px;">Dikembalikan ${formatDate(p.tanggal_kembali)}</span>`}</td>
+                </tr>
+            `).join('');
+        }
+
+        // ==================== RIWAYAT (DENGAN FILTER TIPE) ====================
+        function renderRiwayatTable() {
+            const search = (document.getElementById('searchRiwayat')?.value || '').toLowerCase();
+            const tipeFilter = document.getElementById('filterTipeRiwayat')?.value || '';
+            
+            const sorted = [...appData.riwayat].sort((a,b) => new Date(b.waktu) - new Date(a.waktu));
+            
+            const filtered = sorted.filter(r => {
+                // Filter tipe
+                if (tipeFilter && r.tipe !== tipeFilter) return false;
+                // Filter teks
+                if (!search) return true;
+                return r.tipe.toLowerCase().includes(search) || 
+                       r.detail.toLowerCase().includes(search) ||
+                       (r.user && r.user.toLowerCase().includes(search));
+            });
+            
+            const tbody = document.querySelector('#tableRiwayat tbody');
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><span class="empty-icon">📭</span><br>Tidak ada riwayat yang sesuai</td></tr>';
+            } else {
+                tbody.innerHTML = filtered.map(r => {
+                    let badge = 'badge-info';
+                    if (r.tipe === 'barang_keluar') badge = 'badge-danger';
+                    if (r.tipe === 'peminjaman') badge = 'badge-warning';
+                    if (r.tipe === 'pengembalian') badge = 'badge-success';
+                    if (r.tipe === 'tambah_barang') badge = 'badge-purple';
+                    if (r.tipe === 'edit_barang') badge = 'badge-info';
+                    if (r.tipe === 'hapus_barang') badge = 'badge-danger';
+                    return `<tr>
+                        <td>${formatDateTime(r.waktu)}</td>
+                        <td><span class="badge ${badge}">${r.tipe.replace(/_/g,' ')}</span></td>
+                        <td>${r.detail}</td>
+                        <td>${r.qty || '-'}</td>
+                        <td>${r.user}</td>
+                    </tr>`;
+                }).join('');
+            }
+        }
+
+        document.getElementById('modalMaster').addEventListener('click', function(e) { if (e.target === this) closeMasterModal(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.getElementById('modalMaster').classList.contains('show')) closeMasterModal(); });
+    </script>
+</body>
+</html>
